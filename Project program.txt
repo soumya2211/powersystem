@@ -1,0 +1,68 @@
+clc
+clear all
+mvab=100;kvb=13.2;
+l=load('busdata1.m');
+n=length(l);
+Zb=(kvb^2)/mvab;
+R(:,1)=l(:,4)/Zb;
+X(:,1)=l(:,5)/Zb;
+Z=complex(R(:,1),X(:,1));
+P(:,1)=l(:,6)/mvab;
+Q(:,1)=l(:,7)/mvab;
+C=zeros(n,n);
+for i=1:n
+    a=l(i,2);b=l(i,3);
+    for j=1:n
+        if a==j
+            C(i,j)=-1;
+        elseif b==j
+                C(i,j)=1;
+            else
+                C(i,j)=0;
+        end
+    end
+end
+e=1;
+for i=1:n
+    d=0;
+    for j=1:n
+   if C(j,i)==-1
+       d=1;
+   end
+    end
+    if d==0
+        endnode(e,1)=i;
+        e=e+1;
+    end
+end
+endnode
+ S=complex(P(:,1),Q(:,1));
+ V=ones(size(l,1),1);
+ IB=zeros(size(l,1),1);
+ I=conj(S./V);
+ for i=1:n
+     if i==endnode
+         IB=I;
+     else
+         IB=IB+(I-I(1,1));
+     end
+ end
+ IB
+ V1=V-(IB.*Z)
+ con=abs(V1)-abs(V)
+ V=V1;it=1;
+ while(con>0.001)
+     I=conj(S./V);
+ for i=1:n
+     if i==endnode
+         IB=I;
+     else
+         IB=IB+(I-I(1,1));
+     end
+ end
+ IB
+ V1=V-(IB.*Z)
+ con=abs(V1)-abs(V)
+ V=V1;
+ it=it+1;
+ end
